@@ -1,0 +1,51 @@
+name: 'Upstream Sync'
+
+on:
+  schedule:
+  - cron: '11 11 * * *'
+  workflow_dispatch:
+
+jobs:
+  master:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: master
+    - name: Sync upstream changes
+      id: sync
+      uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
+      with:
+        target_sync_branch: master
+        target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+        upstream_sync_branch: master
+        upstream_sync_repo: hbrs-cse/Modellbildung-und-Simulation
+
+    - name: New commits found
+      if: steps.sync.outputs.has_new_commits == 'true'
+      shell: bash
+      run: echo "New commits to sync were found on master branch"
+        
+  gh_pages:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: gh-pages
+    - name: Sync upstream changes
+      id: sync
+      uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
+      with:
+        target_sync_branch: gh-pages
+        target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+        upstream_sync_branch: gh-pages
+        upstream_sync_repo: hbrs-cse/Modellbildung-und-Simulation
+
+    - name: New commits found
+      if: steps.sync.outputs.has_new_commits == 'true'
+      shell: bash
+      run: echo "New commits to sync were found on gh-pages branch"
+
+
